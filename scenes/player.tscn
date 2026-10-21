@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="SpriteFrames" path="res://Assets/player_frames.tres" id="2_frames"]
@@ -9,9 +9,14 @@ size = Vector2(28, 72)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_crouch"]
 size = Vector2(28, 40)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_clearance"]
+size = Vector2(27, 31)
+
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 1
+floor_snap_length = 6.0
+floor_stop_on_slope = true
 script = ExtResource("1_player")
 
 [node name="CollisionStand" type="CollisionShape2D" parent="."]
@@ -22,8 +27,11 @@ position = Vector2(0, 16)
 shape = SubResource("RectangleShape2D_crouch")
 disabled = true
 
-[node name="CeilingCheck" type="RayCast2D" parent="."]
-target_position = Vector2(0, -46)
+[node name="StandClearance" type="ShapeCast2D" parent="."]
+position = Vector2(0, -20)
+shape = SubResource("RectangleShape2D_clearance")
+target_position = Vector2(0, 0)
+collision_mask = 1
 
 [node name="Visual" type="Node2D" parent="."]
 position = Vector2(0, 36)
@@ -43,9 +51,13 @@ position = Vector2(18, -58)
 [node name="RearOrigin" type="Marker2D" parent="Visual"]
 position = Vector2(-16, -28)
 
+[node name="MouthOrigin" type="Marker2D" parent="Visual"]
+position = Vector2(22, -61)
+
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true
-position_smoothing_speed = 8.0
+position_smoothing_speed = 10.0
+process_callback = 0
 limit_left = 0
 limit_top = -320
 limit_right = 2000

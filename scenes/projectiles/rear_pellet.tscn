@@ -1,28 +1,25 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://scripts/rear_pellet.gd" id="1_pellet"]
+[ext_resource type="Script" path="res://scripts/rear_pellet.gd" id="1"]
+[ext_resource type="Texture2D" path="res://Assets/Bomzh/frames/fart_06.png" id="2"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_pellet"]
-radius = 6.0
+[sub_resource type="CircleShape2D" id="Shape"]
+radius = 7.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pellet"]
-bounce = 0.5
-friction = 0.5
+[sub_resource type="AtlasTexture" id="Ball"]
+atlas = ExtResource("2")
+region = Rect2(153, 56, 128, 62)
 
-[node name="RearPellet" type="RigidBody2D"]
+[node name="GasBall" type="CharacterBody2D"]
 collision_layer = 4
-collision_mask = 1
-gravity_scale = 0.25
-continuous_cd = true
-physics_material_override = SubResource("PhysicsMaterial_pellet")
-script = ExtResource("1_pellet")
+collision_mask = 9
+motion_mode = 1
+script = ExtResource("1")
 
 [node name="Shape" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_pellet")
+shape = SubResource("Shape")
 
-[node name="Visual" type="ColorRect" parent="."]
-offset_left = -6.0
-offset_top = -6.0
-offset_right = 6.0
-offset_bottom = 6.0
-color = Color(0.62, 0.64, 0.3, 1)
+[node name="Sprite" type="Sprite2D" parent="."]
+position = Vector2(-8, 0)
+scale = Vector2(0.32, 0.32)
+texture = SubResource("Ball")
