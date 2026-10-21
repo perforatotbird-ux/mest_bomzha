@@ -1,0 +1,7 @@
+[gd_resource type="ImageTexture" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/environment/embedded_png_texture.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+png_base64 = "iVBORw0KGgoAAAANSUhEUgAAAEgAAAAwCAYAAACynDzrAAABXklEQVR4nO2azQ3CMAxGXcQmbMAInLn3xAYIqZNUqrIBp945MwIbMAucKqEov3aC6uZ710qu82QnaRoiAAAAAIA26UoGm8frp2Q8Cf1gioxNHGRNUnxIZO0kL9Ygh0iWJ8usFjEucqspW1BIzm16vnPj1WK6nQ6+ZzmSsgT55KxJjI1PVEjSPF4/y/MigjTiE/Q7xn4wXbKgLclZsCW5xpgkaItyFvrBdL7x9YPpWMv8muecEK68Q3KIiPa1k9KG3XbRCrINa62ehVD+rolbtJPeEr5VrakW4+yJUEERICgCBEVoTlDuKtyUIM4Wpeoqdn+8qsW+nI/VYv9SVdC/BlGTplqMQ1SQvYkKndRpwM4/drrIbjHt32SpsFpMaxVx8k4S5CpDbZJc+aYc3idXkGZJXDlEBVaxtUuS5of/YhHwZzWC6PKCJlHcCwyiOajUFZPaSPLE/SAAAAAAtMoXZF6MmF1hsKgAAAAASUVORK5CYII="

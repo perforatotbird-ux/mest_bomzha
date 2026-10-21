@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/environment/enemy_placeholder.gd" id="1"]
+[ext_resource type="Texture2D" path="res://Assets/Environment/Sewer/placeholder_guard.tres" id="2"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_h6x2j"]
+font_size = 14
+font_color = Color(1, 0.85, 0.45, 1)
+outline_size = 4
+outline_color = Color(0.04, 0.07, 0.08, 1)
+
+[node name="EnemyPlaceholder" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Shadow" type="ColorRect" parent="."]
+offset_left = -26.0
+offset_top = 36.0
+offset_right = 26.0
+offset_bottom = 48.0
+color = Color(0, 0, 0, 0.35)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -56.0
+offset_top = -78.0
+offset_right = 56.0
+offset_bottom = -52.0
+horizontal_alignment = 1
+text = "ENEMY"
+label_settings = SubResource("LabelSettings_h6x2j")
+

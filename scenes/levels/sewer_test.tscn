@@ -1,0 +1,198 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/environment/sewer_parallax_bg.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/environment/sewer_platform.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/environment/hanging_platform.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/environment/acid_pool.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/environment/pipe_spout.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/environment/door_prop.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/environment/enemy_placeholder.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://scenes/environment/lamp_prop.tscn" id="9"]
+[ext_resource type="Texture2D" path="res://Assets/Environment/Sewer/placeholder_drone.tres" id="10"]
+[ext_resource type="Texture2D" path="res://Assets/Environment/Sewer/placeholder_dog.tres" id="11"]
+[ext_resource type="Texture2D" path="res://Assets/Environment/Sewer/placeholder_rat.tres" id="12"]
+
+[ext_resource type="Script" path="res://scripts/environment/sewer_test_level.gd" id="13"]
+
+[sub_resource type="RectangleShape2D" id="Rect_left"]
+size = Vector2(80, 1400)
+
+[sub_resource type="RectangleShape2D" id="Rect_right"]
+size = Vector2(80, 1400)
+
+[sub_resource type="RectangleShape2D" id="Rect_roof"]
+size = Vector2(2600, 60)
+
+[node name="SewerTest" type="Node2D"]
+script = ExtResource("13")
+
+[node name="SewerParallaxBG" parent="." instance=ExtResource("2")]
+
+[node name="AtmosFog" type="ColorRect" parent="."]
+offset_left = -300.0
+offset_top = 320.0
+offset_right = 2700.0
+offset_bottom = 930.0
+color = Color(0.31, 0.63, 0.18, 0.06)
+
+[node name="WorldBounds" type="Node2D" parent="."]
+
+[node name="LeftWall" type="StaticBody2D" parent="WorldBounds"]
+position = Vector2(-80, 280)
+collision_layer = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/LeftWall"]
+shape = SubResource("Rect_left")
+
+[node name="RightWall" type="StaticBody2D" parent="WorldBounds"]
+position = Vector2(2520, 280)
+collision_layer = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/RightWall"]
+shape = SubResource("Rect_right")
+
+[node name="Roof" type="StaticBody2D" parent="WorldBounds"]
+position = Vector2(1220, -320)
+collision_layer = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBounds/Roof"]
+shape = SubResource("Rect_roof")
+
+[node name="Level" type="Node2D" parent="."]
+
+[node name="StartPlatform" parent="Level" instance=ExtResource("3")]
+position = Vector2(220, 470)
+collision_size = Vector2(390, 40)
+pillar_height = 220.0
+pillar_width = 70.0
+
+[node name="MidPlatform" parent="Level" instance=ExtResource("3")]
+position = Vector2(620, 605)
+collision_size = Vector2(230, 32)
+pillar_height = 130.0
+pillar_width = 48.0
+
+[node name="HangingBridge" parent="Level" instance=ExtResource("4")]
+position = Vector2(980, 560)
+collision_size = Vector2(300, 28)
+chain_height = 230.0
+
+[node name="CenterPlatform" parent="Level" instance=ExtResource("3")]
+position = Vector2(1340, 470)
+collision_size = Vector2(250, 36)
+pillar_height = 210.0
+pillar_width = 64.0
+
+[node name="TopRightPlatform" parent="Level" instance=ExtResource("3")]
+position = Vector2(1680, 390)
+collision_size = Vector2(360, 38)
+
+[node name="LowerRightPlatform" parent="Level" instance=ExtResource("3")]
+position = Vector2(1750, 678)
+collision_size = Vector2(280, 34)
+pillar_height = 108.0
+pillar_width = 62.0
+
+[node name="DoorPlatform" parent="Level" instance=ExtResource("3")]
+position = Vector2(2200, 488)
+collision_size = Vector2(320, 40)
+pillar_height = 170.0
+pillar_width = 68.0
+
+[node name="ServiceStep" parent="Level" instance=ExtResource("3")]
+position = Vector2(1960, 590)
+collision_size = Vector2(170, 26)
+pillar_height = 70.0
+pillar_width = 44.0
+
+[node name="AcidPool" parent="Level" instance=ExtResource("5")]
+position = Vector2(1220, 808)
+pool_size = Vector2(2060, 220)
+
+[node name="PipeSpoutCenter" parent="Level" instance=ExtResource("6")]
+position = Vector2(1230, 310)
+fall_height = 470.0
+fall_width = 22.0
+
+[node name="PipeSpoutRight" parent="Level" instance=ExtResource("6")]
+position = Vector2(2080, 160)
+fall_height = 620.0
+fall_width = 18.0
+scale = Vector2(0.9, 0.9)
+
+[node name="ExitDoor" parent="Level" instance=ExtResource("7")]
+position = Vector2(2285, 310)
+scale = Vector2(0.9, 0.9)
+
+[node name="LampLeft" parent="Level" instance=ExtResource("9")]
+position = Vector2(84, 172)
+
+[node name="LampCenter" parent="Level" instance=ExtResource("9")]
+position = Vector2(1318, 214)
+
+[node name="LampDoor" parent="Level" instance=ExtResource("9")]
+position = Vector2(2290, 182)
+
+[node name="Placeholders" type="Node2D" parent="Level"]
+
+[node name="GuardA" parent="Level/Placeholders" instance=ExtResource("8")]
+position = Vector2(350, 384)
+caption = "GUARD"
+
+[node name="RatA" parent="Level/Placeholders" instance=ExtResource("8")]
+position = Vector2(660, 571)
+scale = Vector2(0.72, 0.72)
+caption = "RAT"
+preview_texture = ExtResource("12")
+
+[node name="DroneA" parent="Level/Placeholders" instance=ExtResource("8")]
+position = Vector2(928, 220)
+caption = "DRONE"
+preview_texture = ExtResource("10")
+
+[node name="DroneB" parent="Level/Placeholders" instance=ExtResource("8")]
+position = Vector2(1945, 414)
+caption = "DRONE"
+preview_texture = ExtResource("10")
+
+[node name="DogA" parent="Level/Placeholders" instance=ExtResource("8")]
+position = Vector2(1705, 329)
+caption = "DOG"
+preview_texture = ExtResource("11")
+
+[node name="GuardB" parent="Level/Placeholders" instance=ExtResource("8")]
+position = Vector2(1820, 595)
+caption = "GUARD"
+
+[node name="Player" parent="." instance=ExtResource("1")]
+position = Vector2(116, 388)
+
+[node name="Camera2D" parent="Player"]
+limit_left = 0
+limit_top = -300
+limit_right = 2460
+limit_bottom = 940
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="ColorRect" parent="HUD"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 950.0
+offset_bottom = 84.0
+mouse_filter = 2
+color = Color(0.02, 0.04, 0.04, 0.85)
+
+[node name="Status" type="Label" parent="HUD"]
+offset_left = 30.0
+offset_top = 20.0
+theme_override_colors/font_color = Color(0.75, 0.95, 0.46, 1)
+theme_override_font_sizes/font_size = 21
+text = "КАНАЛИЗАЦИЯ • Доберись до двери справа   |   R — заново"
+
+[node name="Controls" type="Label" parent="HUD"]
+offset_left = 30.0
+offset_top = 52.0
+theme_override_font_sizes/font_size = 16
+text = "A/D — бег   Space — прыжок   S — присесть   F — бутылка   E/G — газ   |   Враги — макеты"

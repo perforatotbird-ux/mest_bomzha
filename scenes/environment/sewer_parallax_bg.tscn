@@ -1,0 +1,45 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/Environment/Sewer/bg_far.tres" id="1"]
+[ext_resource type="Texture2D" path="res://Assets/Environment/Sewer/bg_mid.tres" id="2"]
+[ext_resource type="Texture2D" path="res://Assets/Environment/Sewer/bg_front.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/environment/parallax_fog.gd" id="4"]
+
+[node name="SewerParallaxBG" type="ParallaxBackground"]
+scroll_base_scale = Vector2(1, 1)
+
+[node name="Far" type="ParallaxLayer" parent="."]
+motion_scale = Vector2(0.18, 0.22)
+motion_mirroring = Vector2(2048, 0)
+
+[node name="FarSprite" type="Sprite2D" parent="Far"]
+centered = false
+texture = ExtResource("1")
+position = Vector2(-120, -140)
+
+[node name="Mid" type="ParallaxLayer" parent="."]
+motion_scale = Vector2(0.45, 0.55)
+motion_mirroring = Vector2(2048, 0)
+
+[node name="MidSprite" type="Sprite2D" parent="Mid"]
+centered = false
+texture = ExtResource("2")
+position = Vector2(-120, -100)
+
+[node name="FogA" type="Sprite2D" parent="Mid"]
+texture = ExtResource("1")
+position = Vector2(980, 510)
+scale = Vector2(0.55, 0.32)
+modulate = Color(0.8, 1, 0.72, 0.13)
+script = ExtResource("4")
+speed = 12.0
+travel = 70.0
+
+[node name="Near" type="ParallaxLayer" parent="."]
+motion_scale = Vector2(0.72, 0.82)
+motion_mirroring = Vector2(2048, 0)
+
+[node name="FrontSprite" type="Sprite2D" parent="Near"]
+centered = false
+texture = ExtResource("3")
+position = Vector2(-120, -70)
