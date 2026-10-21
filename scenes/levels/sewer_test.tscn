@@ -34,7 +34,7 @@ offset_left = -300.0
 offset_top = 320.0
 offset_right = 2700.0
 offset_bottom = 930.0
-color = Color(0.31, 0.63, 0.18, 0.06)
+color = Color(0.16, 0.29, 0.26, 0.035)
 
 [node name="WorldBounds" type="Node2D" parent="."]
 
@@ -108,16 +108,16 @@ pillar_width = 44.0
 
 [node name="AcidPool" parent="Level" instance=ExtResource("5")]
 position = Vector2(1220, 808)
-pool_size = Vector2(2060, 220)
+pool_size = Vector2(2520, 220)
 
 [node name="PipeSpoutCenter" parent="Level" instance=ExtResource("6")]
-position = Vector2(1230, 310)
-fall_height = 470.0
+position = Vector2(1100, 220)
+fall_height = 520.0
 fall_width = 22.0
 
 [node name="PipeSpoutRight" parent="Level" instance=ExtResource("6")]
-position = Vector2(2080, 160)
-fall_height = 620.0
+position = Vector2(2350, 50)
+fall_height = 760.0
 fall_width = 18.0
 scale = Vector2(0.9, 0.9)
 
@@ -166,11 +166,11 @@ position = Vector2(1820, 595)
 caption = "GUARD"
 
 [node name="Player" parent="." instance=ExtResource("1")]
-position = Vector2(116, 388)
+position = Vector2(190, 388)
 
 [node name="Camera2D" parent="Player"]
-limit_left = 0
-limit_top = -300
+limit_left = -80
+limit_top = -160
 limit_right = 2460
 limit_bottom = 940
 
@@ -179,8 +179,8 @@ limit_bottom = 940
 [node name="Panel" type="ColorRect" parent="HUD"]
 offset_left = 16.0
 offset_top = 12.0
-offset_right = 950.0
-offset_bottom = 84.0
+offset_right = 610.0
+offset_bottom = 70.0
 mouse_filter = 2
 color = Color(0.02, 0.04, 0.04, 0.85)
 
@@ -188,11 +188,11 @@ color = Color(0.02, 0.04, 0.04, 0.85)
 offset_left = 30.0
 offset_top = 20.0
 theme_override_colors/font_color = Color(0.75, 0.95, 0.46, 1)
-theme_override_font_sizes/font_size = 21
-text = "КАНАЛИЗАЦИЯ • Доберись до двери справа   |   R — заново"
+theme_override_font_sizes/font_size = 18
+text = "01 / КАНАЛИЗАЦИЯ     •     Найди выход справа"
 
 [node name="Controls" type="Label" parent="HUD"]
 offset_left = 30.0
-offset_top = 52.0
-theme_override_font_sizes/font_size = 16
-text = "A/D — бег   Space — прыжок   S — присесть   F — бутылка   E/G — газ   |   Враги — макеты"
+offset_top = 46.0
+theme_override_font_sizes/font_size = 13
+text = "A/D — бег     Space — прыжок     F/E/G — атаки     R — на старт"

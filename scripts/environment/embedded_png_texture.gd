@@ -12,3 +12,15 @@ extends ImageTexture
 			set_image(image)
 		else:
 			push_error("Embedded PNG decode failed: %s" % error_string(error))
+
+@export_multiline var jpg_base64: String = "":
+	set(value):
+		jpg_base64 = value
+		if value.is_empty():
+			return
+		var image := Image.new()
+		var error := image.load_jpg_from_buffer(Marshalls.base64_to_raw(value))
+		if error == OK:
+			set_image(image)
+		else:
+			push_error("Embedded JPEG decode failed: %s" % error_string(error))

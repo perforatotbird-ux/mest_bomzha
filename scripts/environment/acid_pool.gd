@@ -39,19 +39,19 @@ func _draw() -> void:
 		points.append(Vector2(x, y))
 	points.append(Vector2(left + pool_size.x, top + pool_size.y))
 	points.append(Vector2(left, top + pool_size.y))
-	draw_colored_polygon(points, Color(0.39, 0.82, 0.14, 0.82))
+	draw_colored_polygon(points, Color(0.09, 0.19, 0.105, 0.96))
 	for i in range(segments):
 		var p0 := points[i]
 		var p1 := points[i + 1]
-		draw_line(p0, p1, Color(0.77, 1.0, 0.33, 0.95), 4.0)
-	draw_rect(Rect2(left, top + 24, pool_size.x, pool_size.y - 24), Color(0.17, 0.32, 0.08, 0.55), true)
+		draw_line(p0, p1, Color(0.48, 0.64, 0.22, 0.85), 2.0)
+	draw_rect(Rect2(left, top + 24, pool_size.x, pool_size.y - 24), Color(0.035, 0.085, 0.067, 0.52), true)
 	for bubble: Dictionary in _bubbles:
 		var bx: float = left + pool_size.x * bubble.x
 		var bob: float = fmod(_time * 50.0 * bubble_speed + bubble.phase * 30.0, pool_size.y - 36.0)
 		var by: float = top + pool_size.y - 20.0 - bob
 		var alpha: float = clamp(1.0 - bob / (pool_size.y - 36.0), 0.18, 0.9)
-		draw_arc(Vector2(bx, by), bubble.r, 0, TAU, 20, Color(0.8, 1.0, 0.48, alpha), 2.0)
-		draw_circle(Vector2(bx + bubble.r * 0.5, by - bubble.r * 0.5), 2.0, Color(0.95, 1.0, 0.75, alpha))
+		draw_arc(Vector2(bx, by), bubble.r, 0, TAU, 20, Color(0.46, 0.58, 0.22, alpha * 0.5), 2.0)
+		draw_circle(Vector2(bx + bubble.r * 0.5, by - bubble.r * 0.5), 2.0, Color(0.69, 0.73, 0.40, alpha * 0.6))
 
 func _on_body_entered(body: Node) -> void:
 	if body.has_method("respawn"):

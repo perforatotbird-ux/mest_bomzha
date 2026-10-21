@@ -69,6 +69,8 @@ func _ready() -> void:
 	anim.animation_finished.connect(_on_animation_finished)
 	anim.frame_changed.connect(_on_frame_changed)
 	anim.play(&"idle")
+	$Camera2D.make_current()
+	$Camera2D.reset_smoothing()
 	_update_origins()
 
 func _physics_process(delta: float) -> void:

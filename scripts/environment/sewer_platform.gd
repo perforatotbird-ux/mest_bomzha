@@ -21,9 +21,10 @@ func _ready() -> void:
 func _update_visuals() -> void:
 	if sprite.texture:
 		var tex_size := sprite.texture.get_size()
-		sprite.scale = Vector2(collision_size.x / (tex_size.x - 24.0), max(0.72, collision_size.y / tex_size.y))
-		sprite.position.y = -collision_size.y * 0.5 + (tex_size.y * 0.5 - 14.0) * sprite.scale.y
+		sprite.scale = Vector2(collision_size.x / tex_size.x, maxf(0.36, collision_size.y / tex_size.y))
+		sprite.position.y = -collision_size.y * 0.5 + tex_size.y * 0.5 * sprite.scale.y
 	sprite.modulate = tint
+	grime.visible = false
 	grime.size = Vector2(collision_size.x * 0.82, 18)
 	grime.position = Vector2(-grime.size.x * 0.5, -2)
 	var has_pillar := pillar_height > 0.0

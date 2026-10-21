@@ -17,6 +17,6 @@ func _process(delta: float) -> void:
 
 func _apply() -> void:
 	fall.size = Vector2(fall_width, fall_height)
-	fall.position = Vector2(70, 134)
+	fall.position = Vector2(68, -15)
 	splash.size = Vector2(fall_width * 2.8, 18)
-	splash.position = Vector2(70 - splash.size.x * 0.3, 134 + fall_height - 8)
+	splash.position = Vector2(68 - splash.size.x * 0.3, -15 + fall_height - 8)
