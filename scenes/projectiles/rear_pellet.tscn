@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/rear_pellet.gd" id="1_pellet"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pellet"]
+radius = 6.0
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pellet"]
+bounce = 0.5
+friction = 0.5
+
+[node name="RearPellet" type="RigidBody2D"]
+collision_layer = 4
+collision_mask = 1
+gravity_scale = 0.25
+continuous_cd = true
+physics_material_override = SubResource("PhysicsMaterial_pellet")
+script = ExtResource("1_pellet")
+
+[node name="Shape" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_pellet")
+
+[node name="Visual" type="ColorRect" parent="."]
+offset_left = -6.0
+offset_top = -6.0
+offset_right = 6.0
+offset_bottom = 6.0
+color = Color(0.62, 0.64, 0.3, 1)

@@ -1,0 +1,63 @@
+[gd_scene format=3 uid="uid://dtqogdtpxed25"]
+
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/platform.tscn" id="2_platform"]
+
+[node name="Main" type="Node2D" unique_id=1402374915]
+
+[node name="Background" type="ColorRect" parent="." unique_id=1114425007]
+offset_left = -20.0
+offset_top = -320.0
+offset_right = 2020.0
+offset_bottom = 640.0
+color = Color(0.07, 0.1, 0.17, 1)
+
+[node name="Level" type="Node2D" parent="." unique_id=926380648]
+
+[node name="Ground" parent="Level" unique_id=464134169 instance=ExtResource("2_platform")]
+position = Vector2(1000, 440)
+shape_size = Vector2(2040, 80)
+color = Color(0.22, 0.34, 0.22, 1)
+
+[node name="WallLeft" parent="Level" unique_id=883887368 instance=ExtResource("2_platform")]
+position = Vector2(-20, 160)
+shape_size = Vector2(40, 980)
+color = Color(0.18, 0.2, 0.24, 1)
+
+[node name="WallRight" parent="Level" unique_id=932095636 instance=ExtResource("2_platform")]
+position = Vector2(2020, 160)
+shape_size = Vector2(40, 980)
+color = Color(0.18, 0.2, 0.24, 1)
+
+[node name="P1" parent="Level" unique_id=848762688 instance=ExtResource("2_platform")]
+position = Vector2(240, 330)
+
+[node name="P2" parent="Level" unique_id=638465160 instance=ExtResource("2_platform")]
+position = Vector2(430, 255)
+shape_size = Vector2(140, 24)
+
+[node name="P3" parent="Level" unique_id=247502328 instance=ExtResource("2_platform")]
+position = Vector2(640, 185)
+
+[node name="P4" parent="Level" unique_id=1990369786 instance=ExtResource("2_platform")]
+position = Vector2(860, 260)
+shape_size = Vector2(150, 24)
+
+[node name="P5" parent="Level" unique_id=1532703440 instance=ExtResource("2_platform")]
+position = Vector2(1070, 190)
+shape_size = Vector2(150, 24)
+
+[node name="P6" parent="Level" unique_id=249819988 instance=ExtResource("2_platform")]
+position = Vector2(1300, 300)
+shape_size = Vector2(180, 24)
+
+[node name="P7" parent="Level" unique_id=767057040 instance=ExtResource("2_platform")]
+position = Vector2(1530, 220)
+shape_size = Vector2(140, 24)
+
+[node name="P8" parent="Level" unique_id=375461387 instance=ExtResource("2_platform")]
+position = Vector2(1760, 320)
+shape_size = Vector2(200, 24)
+
+[node name="Player" parent="." unique_id=1908044859 instance=ExtResource("1_player")]
+position = Vector2(100, 358)
