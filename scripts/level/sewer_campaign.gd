@@ -106,8 +106,8 @@ func _build_route() -> void:
 	_surface(80000, 700, 570, false)
 	_interaction("checkpoint", 80090, 550, 8)
 	var door: Node2D = preload("res://scenes/environment/door_prop.tscn").instantiate()
-	door.position = Vector2(80350, 475)
-	door.scale = Vector2.ONE * 0.8
+	door.position = Vector2(80350, 455)
+	door.scale = Vector2.ONE * 0.55
 	add_child(door)
 	_interaction("exit", 80350, 550)
 	_wall(-60, 300, Vector2(60, 1400))
@@ -170,13 +170,14 @@ func _secret_route(sector: int, x: float, base: float) -> void:
 		_sign(Vector2(x + 80, base - 150), "↑ Следы ведут наверх")
 
 func _make_gate(x: float, base: float) -> void:
-	var gate: StaticBody2D = _wall(x, 300, Vector2(28, 1200))
-	var panel := Polygon2D.new()
-	panel.polygon = PackedVector2Array([Vector2(-14, -600), Vector2(14, -600), Vector2(14, 600), Vector2(-14, 600)])
-	panel.color = Color(0.35, 0.3, 0.17)
+	var gate: StaticBody2D = _wall(x, base - 133, Vector2(120, 1200))
+	var panel := Sprite2D.new()
+	panel.texture = preload("res://Assets/Environment/Sewer/door_heavy.tres")
+	panel.scale = Vector2.ONE * 0.65
 	gate.add_child(panel)
 	gates.append(gate)
-	_sign(Vector2(x - 120, base - 160), "[V] ОТКРОЙ ВЕНТИЛЬ")
+	var hint: Label = _sign(Vector2(x - 120, base - 285), "[V] ОТКРОЙ ВЕНТИЛЬ")
+	hint.reparent(gate)
 
 func _wall(x: float, y: float, size: Vector2) -> StaticBody2D:
 	var wall := StaticBody2D.new()
@@ -189,7 +190,7 @@ func _wall(x: float, y: float, size: Vector2) -> StaticBody2D:
 	add_child(wall)
 	return wall
 
-func _sign(at: Vector2, text: String) -> void:
+func _sign(at: Vector2, text: String) -> Label:
 	var label := Label.new()
 	label.position = at
 	label.text = text
@@ -199,6 +200,7 @@ func _sign(at: Vector2, text: String) -> void:
 	label.add_theme_constant_override("shadow_offset_x", 2)
 	label.add_theme_constant_override("shadow_offset_y", 2)
 	add_child(label)
+	return label
 
 func open_valve(index: int) -> void:
 	if index < gates.size() and is_instance_valid(gates[index]):

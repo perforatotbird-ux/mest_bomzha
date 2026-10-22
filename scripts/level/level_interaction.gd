@@ -18,7 +18,7 @@ func _ready() -> void:
 	add_child(shape)
 	body_entered.connect(_entered)
 	label = Label.new()
-	label.position = Vector2(-90, -110)
+	label.position = Vector2(-90, -225 if kind == "exit" else -110)
 	label.size.x = 180
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 13)
