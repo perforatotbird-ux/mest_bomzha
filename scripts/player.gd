@@ -249,7 +249,7 @@ func _update_animation() -> void:
 		target = &"run"
 	_set_sprite_transform(target)
 	# Match foot cadence to real movement, not a walk/run threshold flicker.
-	anim.speed_scale = clampf(absf(velocity.x) / move_speed, 0.55, 1.15) if target == &"run" else 1.0
+	anim.speed_scale = clampf(absf(velocity.x) / move_speed, 0.05, 1.15) if target == &"run" else 1.0
 	if anim.animation != target:
 		anim.play(target)
 

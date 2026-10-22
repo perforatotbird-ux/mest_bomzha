@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ANIMS = {
     'idle': ('idle', [0, 1, 0, 5], 3.0, True),
     'walk': ('walk', list(range(8)), 10.0, True),
-    'run': ('run', list(range(8)), 14.0, True),
+    'run': ('smooth_run', list(range(16)), 24.0, True),
     'crouch': ('crouch', [0], 1.0, True),
     'crouch_walk': ('crouch_walk', list(range(6)), 8.0, True),
     'jump': ('jump', [0, 1, 2], 12.0, False),
@@ -22,18 +22,27 @@ ANIMS = {
 }
 resources = {}
 for folder, frames, _, _ in ANIMS.values():
+    if folder == "smooth_run":
+        continue
     for frame in frames:
         path = (f'Assets/Bomzh/frames/fart_{frame:02}.png' if folder == 'legacy_fart'
                 else f'Assets/Drifter/frames/{folder}/{frame:02}.png')
         assert (ROOT / path).exists(), path
         if path not in resources:
             resources[path] = f't{len(resources)}'
-lines = [f'[gd_resource type="SpriteFrames" load_steps={len(resources)+1} format=3]', '']
+lines = [f'[gd_resource type="SpriteFrames" load_steps={len(resources)+18} format=3]', '']
 lines += [f'[ext_resource type="Texture2D" path="res://{p}" id="{i}"]' for p, i in resources.items()]
+lines += ['[ext_resource type="Texture2D" path="res://Assets/Drifter/smooth_run/run_atlas.tres" id="smooth_run"]', '']
+for index in range(16):
+    lines += [f'[sub_resource type="AtlasTexture" id="run_{index:02}"]', 'atlas = ExtResource("smooth_run")',
+              f'region = Rect2({index % 4 * 384}, {index // 4 * 512}, 384, 512)', '']
 lines += ['', '[resource]', 'animations = [']
 for name, (folder, frames, fps, loop) in ANIMS.items():
     refs = []
     for frame in frames:
+        if folder == "smooth_run":
+            refs.append('{"duration": 1.0, "texture": SubResource("run_%02d")}' % frame)
+            continue
         path = (f'Assets/Bomzh/frames/fart_{frame:02}.png' if folder == 'legacy_fart'
                 else f'Assets/Drifter/frames/{folder}/{frame:02}.png')
         refs.append('{"duration": 1.0, "texture": ExtResource("%s")}' % resources[path])
