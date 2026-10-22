@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Platformer"
 config/description="2D platformer: responsive movement, animated bottle throw, burp and rear gas attacks."
-run/main_scene="res://scenes/levels/sewer_test.tscn"
+run/main_scene="res://scenes/levels/sewer_01.tscn"
 config/features=PackedStringArray("4.7", "4.7.2")
 config/icon="res://icon.svg"
 

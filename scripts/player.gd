@@ -3,6 +3,7 @@ class_name Player
 
 signal health_changed(current: int, maximum: int)
 signal attack_emitted(kind: StringName)
+signal respawned
 
 @export_group("Movement")
 @export var move_speed: float = 260.0
@@ -285,6 +286,7 @@ func take_damage(amount: int) -> void:
 		_play_action(&"hit")
 
 func respawn() -> void:
+	respawned.emit()
 	_dead = false
 	health = max_health
 	_invulnerable = invulnerability_time
@@ -299,3 +301,8 @@ func respawn() -> void:
 	$Camera2D.reset_smoothing()
 	health_changed.emit(health, max_health)
 	_update_animation()
+
+func set_checkpoint(at: Vector2) -> void:
+	_spawn = at
+	health = max_health
+	health_changed.emit(health, max_health)
