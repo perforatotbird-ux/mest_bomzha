@@ -35,6 +35,7 @@ var notice_time: float = 0.0
 var status: Label
 var message: Label
 var controls: Label
+var pad: Label
 var health_bar: Control
 var gates: Array[StaticBody2D] = []
 var route: Array[Dictionary] = []
@@ -76,10 +77,11 @@ func _build_route() -> void:
 			lamp.position = Vector2(x + 180, base - 290)
 			lamp.scale = Vector2.ONE * 0.48
 			add_child(lamp)
-			# Open-sky beats get a bird overhead: it lines up and bombs the ledges.
-			# Kept below the HUD band so it never hides behind the status panel.
+			# Open-sky beats get a pair of birds overhead at different heights; they
+			# hunt the drifter rather than waiting to be flown over.
 			if type in ["gaps", "bridge"] and beat % 4 == 2:
-				_pigeon(x + 520, base - 195, x + 120, x + 880)
+				_pigeon(x + 400, base - 190, x + 110, x + 780)
+				_pigeon(x + 660, base - 265, x + 210, x + 890)
 			match type:
 				"patrol":
 					_enemy("guard", x + 620, base, x + 420, x + 850)
@@ -246,30 +248,41 @@ func _make_hud() -> void:
 	var hud := CanvasLayer.new()
 	hud.name = "HUD"
 	add_child(hud)
-	var panel := ColorRect.new()
-	panel.position = Vector2(12, 12)
-	panel.size = Vector2(1120, 78)
-	panel.color = Color(0.015, 0.035, 0.03, 0.9)
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hud.add_child(panel)
-	status = Label.new()
-	status.position = Vector2(26, 18)
-	status.add_theme_font_size_override("font_size", 18)
-	status.modulate = Color(0.82, 0.93, 0.57)
-	hud.add_child(status)
-	controls = Label.new()
-	controls.position = Vector2(26, 48)
-	controls.add_theme_font_size_override("font_size", 14)
-	controls.text = "A/D — бег   Space — прыжок   S — присесть   F — прицел мышью, отпустить — бросок   E/G — атаки   V — вентиль   R — контрольная точка"
-	hud.add_child(controls)
+	# The dark strip across the top is gone; the health plate owns the corner and the
+	# text runs off it with a shadow, so the sewer stays visible behind the HUD.
 	health_bar = HEALTH_BAR.new()
-	health_bar.position = Vector2(896, 22)
+	health_bar.position = Vector2(16, 14)
 	health_bar.size = Vector2(210, 26)
 	health_bar.set_health(player.health, player.max_health)
 	player.health_changed.connect(health_bar.set_health)
 	hud.add_child(health_bar)
+	status = Label.new()
+	status.position = Vector2(244, 14)
+	status.add_theme_font_size_override("font_size", 18)
+	status.modulate = Color(0.86, 0.95, 0.6)
+	status.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	status.add_theme_constant_override("shadow_offset_x", 2)
+	status.add_theme_constant_override("shadow_offset_y", 2)
+	hud.add_child(status)
+	controls = Label.new()
+	controls.position = Vector2(244, 42)
+	controls.add_theme_font_size_override("font_size", 14)
+	controls.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	controls.add_theme_constant_override("shadow_offset_x", 2)
+	controls.add_theme_constant_override("shadow_offset_y", 2)
+	controls.text = "A/D — бег   Space — прыжок   S — присесть   F — прицел мышью, отпустить — бросок   E/G — атаки   V — вентиль   R — контрольная точка"
+	hud.add_child(controls)
+	pad = Label.new()
+	pad.position = Vector2(244, 64)
+	pad.add_theme_font_size_override("font_size", 14)
+	pad.modulate = Color(0.72, 0.86, 0.78)
+	pad.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	pad.add_theme_constant_override("shadow_offset_x", 2)
+	pad.add_theme_constant_override("shadow_offset_y", 2)
+	pad.text = "Геймпад: левый стик — бег, A — прыжок, X — бросок (правый стик — прицел), B — рыгание, Y — газовая атака, RB — вентиль, BACK — контрольная точка, START — заново"
+	hud.add_child(pad)
 	message = Label.new()
-	message.position = Vector2(26, 100)
+	message.position = Vector2(16, 100)
 	message.add_theme_font_size_override("font_size", 18)
 	message.add_theme_color_override("font_shadow_color", Color.BLACK)
 	message.add_theme_constant_override("shadow_offset_x", 2)
@@ -288,16 +301,22 @@ func _process(delta: float) -> void:
 		$SewerParallaxBG/Far/FarSprite.modulate = tint
 	status.text = "%02d / %s   •   %d%%   •   %02d:%02d   •   Вентили %d/4   •   Тайники %d/8" % [sector + 1, SECTORS[sector], clampi(int(player.position.x / LENGTH * 100), 0, 100), int(elapsed) / 60, int(elapsed) % 60, valves, secrets]
 
-func _unhandled_key_input(event: InputEvent) -> void:
-	if not event is InputEventKey or not event.pressed or event.echo:
+## Valve, respawn and restart go through actions so a pad can drive them too:
+## V / RB, R / BACK, Shift+R / START. Actions rather than raw keycodes, because
+## _unhandled_key_input never sees a joypad button.
+func _unhandled_input(event: InputEvent) -> void:
+	if completed:
+		if Input.is_action_just_pressed(&"restart"):
+			get_tree().reload_current_scene()
 		return
-	if event.physical_keycode == KEY_V and not completed:
+	if Input.is_action_just_pressed(&"valve"):
 		for item in get_tree().get_nodes_in_group("level_interactions"):
 			if item.kind == "valve" and not item.used and player.global_position.distance_to(item.global_position) < 95:
 				item.activate()
 				break
-	elif event.physical_keycode == KEY_R:
-		if event.shift_pressed:
-			get_tree().reload_current_scene()
-		elif not completed:
-			player.respawn()
+	# Restart wins over respawn: both are bound to R, and a shifted press must not
+	# also bounce the drifter back to the checkpoint.
+	if Input.is_action_just_pressed(&"restart"):
+		get_tree().reload_current_scene()
+	elif Input.is_action_just_pressed(&"respawn"):
+		player.respawn()

@@ -8,7 +8,7 @@ var completed: bool = false
 
 func _ready() -> void:
 	var bar: Control = HEALTH_BAR.new()
-	bar.position = Vector2(624, 22)
+	bar.position = Vector2(16, 14)
 	bar.size = Vector2(210, 26)
 	bar.set_health(player.health, player.max_health)
 	player.health_changed.connect(bar.set_health)
@@ -20,8 +20,11 @@ func _process(_delta: float) -> void:
 		status.text = "ТЕСТ ПРОЙДЕН • Выход найден!   R — заново"
 		$Level/ExitDoor/Glow.color = Color(0.5, 1.0, 0.25, 0.28)
 
-func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_R:
+## R and Shift+R are read as actions so the pad buttons reach the same code path.
+func _unhandled_input(event: InputEvent) -> void:
+	if Input.is_action_just_pressed(&"restart"):
+		get_tree().reload_current_scene()
+	elif Input.is_action_just_pressed(&"respawn"):
 		completed = false
 		status.text = "01 / КАНАЛИЗАЦИЯ     •     Найди выход справа"
 		$Level/ExitDoor/Glow.color = Color(1, 0.74, 0.3, 0.12)

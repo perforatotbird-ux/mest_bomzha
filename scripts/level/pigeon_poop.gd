@@ -1,9 +1,11 @@
 extends CharacterBody2D
-## Pigeon dropping: falls, splats on the first surface or on the drifter's head.
+class_name PigeonPoop
+## Pigeon dropping: falls on the side speed the bird gave it, so a swoop release
+## comes out flat and fast instead of dropping straight down. `velocity` is the
+## one CharacterBody2D already owns, so a dive can hand the bomb sideways speed.
 const GRAVITY := 1200.0
 const TERMINAL := 720.0
 
-var _fall: float = 60.0
 var _life: float = 4.0
 
 func _ready() -> void:
@@ -21,8 +23,8 @@ func _physics_process(delta: float) -> void:
 	if _life <= 0.0:
 		queue_free()
 		return
-	_fall = minf(_fall + GRAVITY * delta, TERMINAL)
-	var hit := move_and_collide(Vector2(0.0, _fall) * delta)
+	velocity.y = minf(velocity.y + GRAVITY * delta, TERMINAL)
+	var hit := move_and_collide(velocity * delta)
 	if hit:
 		var body := hit.get_collider()
 		if body.has_method("take_damage"):

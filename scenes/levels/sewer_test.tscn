@@ -176,23 +176,31 @@ limit_bottom = 940
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
-[node name="Panel" type="ColorRect" parent="HUD"]
-offset_left = 16.0
-offset_top = 12.0
-offset_right = 610.0
-offset_bottom = 70.0
-mouse_filter = 2
-color = Color(0.02, 0.04, 0.04, 0.85)
-
 [node name="Status" type="Label" parent="HUD"]
-offset_left = 30.0
-offset_top = 20.0
-theme_override_colors/font_color = Color(0.75, 0.95, 0.46, 1)
+offset_left = 244.0
+offset_top = 14.0
+theme_override_colors/font_color = Color(0.86, 0.95, 0.6, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 18
 text = "01 / КАНАЛИЗАЦИЯ     •     Найди выход справа"
 
 [node name="Controls" type="Label" parent="HUD"]
-offset_left = 30.0
-offset_top = 46.0
+offset_left = 244.0
+offset_top = 42.0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 13
 text = "A/D — бег     Space — прыжок     F — прицел мышью     E/G — атаки     R — на старт"
+
+[node name="Pad" type="Label" parent="HUD"]
+offset_left = 244.0
+offset_top = 62.0
+modulate = Color(0.72, 0.86, 0.78, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 13
+text = "Геймпад: стик — бег, A — прыжок, X — бросок (правый стик — прицел), B — рыгание, Y — газовая атака, BACK — на старт"

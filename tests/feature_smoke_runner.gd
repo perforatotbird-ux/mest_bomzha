@@ -65,6 +65,23 @@ func run() -> void:
 	check(thrown.get_node("Sprite").flip_h, "leftward throw mirrors the bottle")
 	thrown.free()
 
+	# 3a. The preview is a bead trail, not a drawn line.
+	var dots: Node2D = player.get_node("Trajectory")
+	check(dots is Node2D and not dots is Line2D, "trajectory is no longer a line")
+	var dot_script: Script = dots.get_script()
+	check(dot_script != null and str(dot_script.resource_path).ends_with("aim_dots.gd"), "trajectory draws beads")
+	player._aiming = true
+	await tick(2)
+	check(dots.visible, "beads show while aiming")
+	var trail: PackedVector2Array = dots.get("points")
+	check(trail.size() >= 2, "beads cover the arc")
+	# If the arc never hit anything the preview would fill the whole window.
+	var full_window: int = int(player.preview_seconds / player.preview_step) + 1
+	check(trail.size() < full_window, "the bead trail stops where the bottle lands")
+	player._aiming = false
+	await tick(2)
+	check(not dots.visible, "beads hide when not aiming")
+
 	# 4. Health bar tracks the player signal.
 	var bar: Control = HEALTH_BAR.new()
 	level.add_child(bar)
@@ -114,26 +131,48 @@ func run() -> void:
 	await tick(30)
 	check(going_right and bird.velocity.x < 0.0, "pigeon turns around at the ends of its lane")
 
-	# 5c. Back over the drifter, then it lines up and drops.
+	# 5c. Put the bird over the drifter: it hunts, aims where the bomb lands,
+	# swoops from both flanks and keeps coming back instead of giving up.
 	bird.global_position = player.global_position + Vector2(0, -180)
 	bird._home_y = bird.global_position.y
 	bird._cooldown = 0.0
 	await tick(4)
-	var dropped := false
-	for _i in 180:
-		await physics_frame
-		if bird.state == "drop":
-			dropped = true
-			break
-	check(dropped, "pigeon lines up and drops")
+	var hunted := false
+	var aimed := false
+	var swooped := false
 	var poop_found := false
-	for child in level.get_children():
-		var script_path := "" if child.get_script() == null else str(child.get_script().resource_path)
-		if script_path.ends_with("pigeon_poop.gd"):
-			poop_found = true
+	var marker_matches := 0
+	var flanks := []
+	var damage_seen := false
+	var start_health: int = player.health
+	for _i in 240:
+		await physics_frame
+		if bird.state == Pigeon.State.HUNT:
+			hunted = true
+		elif bird.state == Pigeon.State.WINDUP:
+			aimed = true
+			if absf(bird._predict_landing().x - bird._splash.x) < 1.0:
+				marker_matches += 1
+		elif bird.state == Pigeon.State.SWOOP:
+			swooped = true
+			if not flanks.has(bird._flank):
+				flanks.append(bird._flank)
+			if not poop_found:
+				# Catch the bomb the moment it is released; it is freed on impact.
+				for child in level.get_children():
+					var script_path := "" if child.get_script() == null else str(child.get_script().resource_path)
+					if script_path.ends_with("pigeon_poop.gd"):
+						poop_found = true
+		if player.health < start_health:
+			damage_seen = true
+	check(hunted, "pigeon hunts the drifter instead of only patrolling")
+	check(aimed, "pigeon telegraphs before it drops")
+	check(marker_matches > 0, "the landing marker is where the bomb actually goes")
+	check(swooped, "pigeon swoops in on the drifter")
+	check(flanks.size() == 2, "pigeon attacks from both flanks")
+	check(damage_seen, "a hunted drifter gets hit")
+	check(bird.state != Pigeon.State.PATROL, "pigeon keeps hunting instead of breaking off")
 	check(poop_found, "drop spawns a falling projectile")
-	await tick(60)
-	check(player.health < player.max_health, "dropping hurts the drifter")
 	check(bird.health == bird.maximum, "pigeon survives its own drop")
 
 	# 6. A pigeon dies to the same damage interface as the ground enemies.

@@ -1,17 +1,18 @@
 extends Control
 ## Segmented health plate for the sewer HUD: a hand-drawn heart, then one cell per
-## hit point. Colours slide from sickly green to rust as the drifter takes damage.
+## hit point. Yellow, deepening as the drifter takes damage.
+## Per request: the plate sits in the top-left corner and reads yellow, not green.
 
 const HEART_W := 20.0
 const HEART_GAP := 8.0
 const CELL_GAP := 3.0
 
-const FULL := Color(0.62, 0.84, 0.36)
-const HURT := Color(0.92, 0.72, 0.26)
-const CRITICAL := Color(0.86, 0.3, 0.18)
+const FULL := Color(0.96, 0.8, 0.16)
+const HURT := Color(0.88, 0.62, 0.1)
+const CRITICAL := Color(0.76, 0.42, 0.08)
 const EMPTY := Color(0.08, 0.09, 0.08, 0.92)
 const FRAME := Color(0.42, 0.33, 0.19, 0.95)
-const PLATE := Color(0.02, 0.045, 0.04, 0.92)
+const PLATE := Color(0.02, 0.045, 0.04, 0.55)
 
 var maximum: int = 5
 var value: int = 5

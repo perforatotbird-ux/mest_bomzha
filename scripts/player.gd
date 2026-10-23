@@ -28,6 +28,8 @@ signal respawned
 @export var gas_speed: float = 460.0
 @export var preview_seconds: float = 1.8
 @export var preview_step: float = 0.04
+## Right-stick deflection below this is ignored, so a resting pad does not aim.
+const AIM_DEADZONE := 0.25
 @export_group("Health")
 @export var max_health: int = 5
 @export var invulnerability_time: float = 1.0
@@ -51,7 +53,7 @@ const AIRBORNE_SCALE_BOOST := 1.17
 @onready var throw_origin: Marker2D = $Visual/ThrowOrigin
 @onready var rear_origin: Marker2D = $Visual/RearOrigin
 @onready var mouth_origin: Marker2D = $Visual/MouthOrigin
-@onready var trajectory: Line2D = $Trajectory
+@onready var trajectory: Node2D = $Trajectory
 
 var facing: int = 1
 var crouching: bool = false
@@ -108,9 +110,10 @@ func _physics_process(delta: float) -> void:
 		_action = &""
 	if not _is_attacking() and _action != &"hit" and not is_zero_approx(input_x):
 		facing = -1 if input_x < 0.0 else 1
-	# While aiming, the cursor owns the direction: the throw arm and the sprite turn with it.
+	# While aiming, the cursor or the right stick owns the direction: the throw arm
+	# and the sprite turn with it.
 	if _aiming:
-		facing = -1 if get_global_mouse_position().x < global_position.x else 1
+		facing = -1 if _aim_target().x < global_position.x else 1
 	_update_origins()
 	_update_crouch()
 
@@ -241,10 +244,14 @@ func _update_origins() -> void:
 	rear_origin.position = Vector2(-22.0 * facing, -29.0)
 	anim.flip_h = facing < 0
 
-## Aim vector from the throw hand to the cursor. The speed is the one that just
-## carries the bottle to the cursor on a 45-degree line, so close points become
-## lobs and far points fly flat; the preview draws the real arc either way.
+## Aim vector from the throw hand to the cursor, or from the right stick when a pad
+## is driving. The mouse path picks the speed whose 45-degree arc just reaches the
+## cursor, so close points become lobs and far points fly flat; the stick path takes
+## both direction and power from the deflection, and the preview draws either arc.
 func _aim_velocity() -> Vector2:
+	var stick := _aim_stick()
+	if stick.length() > AIM_DEADZONE:
+		return _aim_from_stick(stick)
 	var origin := throw_origin.global_position
 	var offset := get_global_mouse_position() - origin
 	var distance := offset.length()
@@ -252,6 +259,32 @@ func _aim_velocity() -> Vector2:
 		# Cursor sits on the character: throw forward instead of dropping at the feet.
 		return Vector2(facing * throw_speed_min, -throw_speed_min * 0.8)
 	return offset / distance * _aim_speed(distance)
+
+## Stick deflection to launch velocity: direction and power both come from it, so a
+## flick is a hard flat throw and a nudge is a lob. Split out so it is testable
+## without a pad plugged in.
+func _aim_from_stick(stick: Vector2) -> Vector2:
+	var power: float = clampf(stick.length(), 0.0, 1.0)
+	return stick.normalized() * lerpf(throw_speed_min, throw_speed_max, power)
+
+## Right stick of any connected pad, above the deadzone. Zero when the mouse is the
+## aiming device, so keyboard and mouse play is untouched.
+func _aim_stick() -> Vector2:
+	for device in Input.get_connected_joypads():
+		var stick := Vector2(
+			Input.get_joy_axis(device, JOY_AXIS_RIGHT_X),
+			Input.get_joy_axis(device, JOY_AXIS_RIGHT_Y)
+		)
+		if stick.length() > AIM_DEADZONE:
+			return stick
+	return Vector2.ZERO
+
+## World point the throw is aimed at, used to turn the character towards the aim.
+func _aim_target() -> Vector2:
+	var stick := _aim_stick()
+	if stick.length() > AIM_DEADZONE:
+		return global_position + stick.normalized() * 160.0
+	return get_global_mouse_position()
 
 func _aim_speed(distance: float) -> float:
 	var gravity := float(ProjectSettings.get_setting("physics/2d/default_gravity"))
@@ -277,6 +310,7 @@ func _update_preview() -> void:
 		previous = point
 		t += preview_step
 	trajectory.points = points
+	trajectory.queue_redraw()
 
 func _update_animation() -> void:
 	if _action != &"":
