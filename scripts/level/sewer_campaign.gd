@@ -18,9 +18,11 @@ const BRIDGE = preload("res://scenes/environment/hanging_platform.tscn")
 const ACID = preload("res://scenes/environment/acid_pool.tscn")
 const LAMP = preload("res://scenes/environment/lamp_prop.tscn")
 const ENEMY = preload("res://scripts/level/sewer_enemy.gd")
+const PIGEON = preload("res://scripts/level/pigeon.gd")
 const TRAP = preload("res://scripts/level/sewer_trap.gd")
 const INTERACTION = preload("res://scripts/level/level_interaction.gd")
 const GRATE = preload("res://scripts/level/breakable_grate.gd")
+const HEALTH_BAR = preload("res://scripts/ui/health_bar.gd")
 var player: Player
 var elapsed: float = 0.0
 var secrets: int = 0
@@ -33,6 +35,7 @@ var notice_time: float = 0.0
 var status: Label
 var message: Label
 var controls: Label
+var health_bar: Control
 var gates: Array[StaticBody2D] = []
 var route: Array[Dictionary] = []
 
@@ -73,6 +76,10 @@ func _build_route() -> void:
 			lamp.position = Vector2(x + 180, base - 290)
 			lamp.scale = Vector2.ONE * 0.48
 			add_child(lamp)
+			# Open-sky beats get a bird overhead: it lines up and bombs the ledges.
+			# Kept below the HUD band so it never hides behind the status panel.
+			if type in ["gaps", "bridge"] and beat % 4 == 2:
+				_pigeon(x + 520, base - 195, x + 120, x + 880)
 			match type:
 				"patrol":
 					_enemy("guard", x + 620, base, x + 420, x + 850)
@@ -137,6 +144,15 @@ func _enemy(kind: String, x: float, y: float, left: float, right: float) -> void
 	enemy.target = player
 	enemy.defeated.connect(func() -> void: kills += 1)
 	add_child(enemy)
+
+func _pigeon(x: float, y: float, left: float, right: float) -> void:
+	var bird := PIGEON.new()
+	bird.position = Vector2(x, y)
+	bird.patrol_left = left
+	bird.patrol_right = right
+	bird.target = player
+	bird.defeated.connect(func() -> void: kills += 1)
+	add_child(bird)
 
 func _trap(kind: String, x: float, y: float, phase: float) -> void:
 	var trap := TRAP.new()
@@ -244,8 +260,14 @@ func _make_hud() -> void:
 	controls = Label.new()
 	controls.position = Vector2(26, 48)
 	controls.add_theme_font_size_override("font_size", 14)
-	controls.text = "A/D — бег   Space — прыжок   S — присесть   F/E/G — атаки   V — вентиль   R — контрольная точка"
+	controls.text = "A/D — бег   Space — прыжок   S — присесть   F — прицел мышью, отпустить — бросок   E/G — атаки   V — вентиль   R — контрольная точка"
 	hud.add_child(controls)
+	health_bar = HEALTH_BAR.new()
+	health_bar.position = Vector2(896, 22)
+	health_bar.size = Vector2(210, 26)
+	health_bar.set_health(player.health, player.max_health)
+	player.health_changed.connect(health_bar.set_health)
+	hud.add_child(health_bar)
 	message = Label.new()
 	message.position = Vector2(26, 100)
 	message.add_theme_font_size_override("font_size", 18)
@@ -264,7 +286,7 @@ func _process(delta: float) -> void:
 		current_sector = sector
 		var tint: Color = [Color(1,1,1), Color(0.83,0.92,0.83), Color(1,0.87,0.73), Color(0.85,0.95,1), Color(0.81,0.94,0.88), Color(0.8,0.87,1), Color(1,0.85,0.77), Color(0.85,1,0.88)][sector]
 		$SewerParallaxBG/Far/FarSprite.modulate = tint
-	status.text = "%02d / %s   •   HP %d/%d   •   %d%%   •   %02d:%02d   •   Вентили %d/4   •   Тайники %d/8" % [sector + 1, SECTORS[sector], player.health, player.max_health, clampi(int(player.position.x / LENGTH * 100), 0, 100), int(elapsed) / 60, int(elapsed) % 60, valves, secrets]
+	status.text = "%02d / %s   •   %d%%   •   %02d:%02d   •   Вентили %d/4   •   Тайники %d/8" % [sector + 1, SECTORS[sector], clampi(int(player.position.x / LENGTH * 100), 0, 100), int(elapsed) / 60, int(elapsed) % 60, valves, secrets]
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:

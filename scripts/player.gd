@@ -18,11 +18,15 @@ signal respawned
 @export var coyote_time: float = 0.1
 @export var jump_buffer: float = 0.15
 @export_group("Attacks")
-@export var throw_velocity := Vector2(520.0, -420.0)
+## Cursor aiming: the bottle leaves at the speed that just carries it to the cursor,
+## so a close point becomes a lob and a far one a hard throw.
+@export var throw_power_scale: float = 1.0
+@export var throw_speed_min: float = 260.0
+@export var throw_speed_max: float = 900.0
 @export var throw_cooldown: float = 0.4
 @export var gas_cooldown: float = 0.65
 @export var gas_speed: float = 460.0
-@export var preview_seconds: float = 1.2
+@export var preview_seconds: float = 1.8
 @export var preview_step: float = 0.04
 @export_group("Health")
 @export var max_health: int = 5
@@ -65,6 +69,7 @@ var _action: StringName = &""
 var _attack_facing: int = 1
 var _emitted: bool = false
 var _aiming: bool = false
+var _throw_aim: Vector2 = Vector2(520.0, -420.0)
 var _dead: bool = false
 var _respawn_timer: float = 0.0
 var _crouch_settled: bool = false
@@ -103,6 +108,9 @@ func _physics_process(delta: float) -> void:
 		_action = &""
 	if not _is_attacking() and _action != &"hit" and not is_zero_approx(input_x):
 		facing = -1 if input_x < 0.0 else 1
+	# While aiming, the cursor owns the direction: the throw arm and the sprite turn with it.
+	if _aiming:
+		facing = -1 if get_global_mouse_position().x < global_position.x else 1
 	_update_origins()
 	_update_crouch()
 
@@ -171,6 +179,10 @@ func _handle_attacks() -> void:
 	if _aiming and Input.is_action_just_released(&"throw"):
 		_aiming = false
 		if _throw_cd <= 0.0:
+			# Freeze the aim at release: the bottle must fly where the preview promised,
+			# not wherever the cursor drifted to during the wind-up animation.
+			_update_origins()
+			_throw_aim = _aim_velocity()
 			_play_action(&"throw")
 			_throw_cd = throw_cooldown
 	elif Input.is_action_just_pressed(&"burp") and _gas_cd <= 0.0:
@@ -204,8 +216,10 @@ func _emit_attack(kind: StringName, direction: int) -> void:
 		var bottle := THROWN_ITEM.instantiate() as RigidBody2D
 		get_tree().current_scene.add_child(bottle)
 		bottle.global_position = throw_origin.global_position
-		bottle.linear_velocity = Vector2(direction * throw_velocity.x, throw_velocity.y)
-		bottle.angular_velocity = direction * 8.0
+		bottle.linear_velocity = _throw_aim
+		# The spin lives in the sprite frames, so the body itself stays unrotated;
+		# mirroring keeps the tumble leaning the way the bottle is flying.
+		bottle.get_node("Sprite").flip_h = _throw_aim.x < 0.0
 	else:
 		var rear := kind == &"rear_shot"
 		var shot_direction := -direction if rear else direction
@@ -227,13 +241,29 @@ func _update_origins() -> void:
 	rear_origin.position = Vector2(-22.0 * facing, -29.0)
 	anim.flip_h = facing < 0
 
+## Aim vector from the throw hand to the cursor. The speed is the one that just
+## carries the bottle to the cursor on a 45-degree line, so close points become
+## lobs and far points fly flat; the preview draws the real arc either way.
+func _aim_velocity() -> Vector2:
+	var origin := throw_origin.global_position
+	var offset := get_global_mouse_position() - origin
+	var distance := offset.length()
+	if distance < 16.0:
+		# Cursor sits on the character: throw forward instead of dropping at the feet.
+		return Vector2(facing * throw_speed_min, -throw_speed_min * 0.8)
+	return offset / distance * _aim_speed(distance)
+
+func _aim_speed(distance: float) -> float:
+	var gravity := float(ProjectSettings.get_setting("physics/2d/default_gravity"))
+	return clampf(sqrt(distance * gravity) * throw_power_scale, throw_speed_min, throw_speed_max)
+
 func _update_preview() -> void:
 	trajectory.visible = _aiming and not _is_attacking()
 	if not trajectory.visible:
 		return
 	var points := PackedVector2Array()
 	var origin := throw_origin.global_position
-	var initial := Vector2(facing * throw_velocity.x, throw_velocity.y)
+	var initial := _aim_velocity()
 	var gravity := float(ProjectSettings.get_setting("physics/2d/default_gravity"))
 	var previous := origin
 	var t := 0.0

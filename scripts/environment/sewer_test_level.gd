@@ -1,8 +1,18 @@
 extends Node2D
 
+const HEALTH_BAR = preload("res://scripts/ui/health_bar.gd")
+
 var completed: bool = false
 @onready var player: Player = $Player
 @onready var status: Label = $HUD/Status
+
+func _ready() -> void:
+	var bar: Control = HEALTH_BAR.new()
+	bar.position = Vector2(624, 22)
+	bar.size = Vector2(210, 26)
+	bar.set_health(player.health, player.max_health)
+	player.health_changed.connect(bar.set_health)
+	$HUD.add_child(bar)
 
 func _process(_delta: float) -> void:
 	if not completed and player.global_position.x > 2220.0 and player.is_on_floor() and player.global_position.y < 450.0:

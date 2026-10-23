@@ -19,6 +19,8 @@ func run_tests() -> void:
 	var enemies: Array[Node] = get_nodes_in_group("level_enemies")
 	for enemy in enemies:
 		enemy.set_physics_process(false)
+	for bird in get_nodes_in_group("pigeons"):
+		bird.set_physics_process(false)
 	for trap in get_nodes_in_group("level_traps"):
 		trap.set_physics_process(false)
 	player.set_physics_process(false)
