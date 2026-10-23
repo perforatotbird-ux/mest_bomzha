@@ -1,2 +1,4 @@
 .godot/
 *.tmp
+# Agent workspace: memory notes and local screenshots, not game content.
+.workbuddy-ai/

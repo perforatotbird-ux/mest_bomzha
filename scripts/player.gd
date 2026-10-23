@@ -32,6 +32,13 @@ const THROWN_ITEM: PackedScene = preload("res://scenes/projectiles/thrown_item.t
 const GAS_BALL: PackedScene = preload("res://scenes/projectiles/rear_pellet.tscn")
 const GAS_CLOUD = preload("res://scripts/gas_cloud.gd")
 const RELEASE_FRAMES := {&"throw": 3, &"burp": 2, &"rear_shot": 2}
+const SPRITE_SCALE := 0.22
+# Distance from the centre of a 384x512 frame down to the pack's foot line (y=464).
+const SPRITE_FEET_OFFSET := 208.0
+# The pack draws the airborne set ~15% smaller than the grounded sets (head 95 px
+# against 111 px in idle). Compensate, or the character shrinks as he leaves the floor.
+const AIRBORNE_ANIMS := [&"jump", &"fall", &"landing"]
+const AIRBORNE_SCALE_BOOST := 1.17
 
 @onready var collision_stand: CollisionShape2D = $CollisionStand
 @onready var collision_crouch: CollisionShape2D = $CollisionCrouch
@@ -60,6 +67,7 @@ var _emitted: bool = false
 var _aiming: bool = false
 var _dead: bool = false
 var _respawn_timer: float = 0.0
+var _crouch_settled: bool = false
 
 func _ready() -> void:
 	_spawn = global_position
@@ -145,6 +153,8 @@ func _update_crouch() -> void:
 		_set_crouch(false)
 
 func _set_crouch(active: bool) -> void:
+	if active != crouching:
+		_crouch_settled = false
 	crouching = active
 	collision_stand.set_deferred("disabled", active)
 	collision_crouch.set_deferred("disabled", not active)
@@ -251,21 +261,32 @@ func _update_animation() -> void:
 	_set_sprite_transform(target)
 	# Match foot cadence to real movement, not a walk/run threshold flicker.
 	anim.speed_scale = clampf(absf(velocity.x) / move_speed, 0.05, 1.15) if target == &"run" else 1.0
+	if target == &"crouch_walk":
+		# Moving cancels the stand-to-squat descent: the player is already down.
+		_crouch_settled = true
 	if anim.animation != target:
 		anim.play(target)
+		if target == &"crouch" and _crouch_settled:
+			# Descent already played for this crouch, so hold the settled pose
+			# instead of standing up and squatting down again on every stop.
+			anim.frame = anim.sprite_frames.get_frame_count(&"crouch") - 1
 
 func _set_sprite_transform(kind: StringName) -> void:
 	# Legacy fart frames have a different canvas. Both sets share the feet baseline.
 	if kind == &"rear_shot":
 		anim.scale = Vector2(0.44, 0.44)
 		anim.position = Vector2(-10.0 * facing, -42.24)
-	else:
-		anim.scale = Vector2(0.22, 0.22)
-		anim.position = Vector2(0.0, -45.76)
+		return
+	var sprite_scale := SPRITE_SCALE * (AIRBORNE_SCALE_BOOST if AIRBORNE_ANIMS.has(kind) else 1.0)
+	anim.scale = Vector2(sprite_scale, sprite_scale)
+	# Feet stay on the collision floor whatever the scale is.
+	anim.position = Vector2(0.0, -SPRITE_FEET_OFFSET * sprite_scale)
 
 func _on_animation_finished() -> void:
 	if _dead:
 		return
+	if anim.animation == &"crouch":
+		_crouch_settled = true
 	_action = &""
 	_update_animation()
 
