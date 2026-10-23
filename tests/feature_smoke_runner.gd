@@ -90,6 +90,35 @@ func run() -> void:
 	bird.target = player
 	bird.drop_cooldown = 0.0
 	level.add_child(bird)
+
+	# 5a. The bird flaps: four looping poses and a frame that actually advances.
+	var bird_sprite := bird.get_node_or_null("Sprite")
+	check(bird_sprite is AnimatedSprite2D, "pigeon sprite is animated")
+	if bird_sprite is AnimatedSprite2D:
+		var bird_frames: SpriteFrames = bird_sprite.sprite_frames
+		check(bird_frames.has_animation(&"flap"), "pigeon flap animation present")
+		check(bird_frames.get_frame_count(&"flap") == 4, "pigeon has four wing poses")
+		check(bird_frames.get_animation_loop(&"flap"), "pigeon flaps on a loop")
+		var first: int = bird_sprite.frame
+		await tick(12)
+		check(bird_sprite.frame != first or bird_sprite.frame_progress > 0.0, "wings move over time")
+		check(bird_sprite.is_playing(), "flap animation keeps running")
+
+	# 5b. The bird flies its lane back and forth.
+	var left_edge := bird.patrol_left + 20.0
+	var right_edge := bird.patrol_right - 20.0
+	bird.global_position.x = left_edge
+	await tick(30)
+	var going_right := bird.velocity.x > 0.0
+	bird.global_position.x = right_edge
+	await tick(30)
+	check(going_right and bird.velocity.x < 0.0, "pigeon turns around at the ends of its lane")
+
+	# 5c. Back over the drifter, then it lines up and drops.
+	bird.global_position = player.global_position + Vector2(0, -180)
+	bird._home_y = bird.global_position.y
+	bird._cooldown = 0.0
+	await tick(4)
 	var dropped := false
 	for _i in 180:
 		await physics_frame

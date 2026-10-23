@@ -1,0 +1,11 @@
+[gd_resource type="SpriteFrames" load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/Enemies/pigeon_00.tres" id="t0"]
+[ext_resource type="Texture2D" path="res://Assets/Enemies/pigeon_01.tres" id="t1"]
+[ext_resource type="Texture2D" path="res://Assets/Enemies/pigeon_02.tres" id="t2"]
+[ext_resource type="Texture2D" path="res://Assets/Enemies/pigeon_03.tres" id="t3"]
+
+[resource]
+animations = [
+{"frames": [{"duration": 1.0, "texture": ExtResource("t0")}, {"duration": 1.0, "texture": ExtResource("t1")}, {"duration": 1.0, "texture": ExtResource("t2")}, {"duration": 1.0, "texture": ExtResource("t3")}], "loop": true, "name": &"flap", "speed": 12.0}
+]

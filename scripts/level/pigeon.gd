@@ -1,23 +1,28 @@
 extends CharacterBody2D
-## Flying vermin: cruises a lane above the route, lines up over the player and bombs.
-## No gravity and no world collision: it lives in the air between the ledges.
+## Flying vermin: patrols a lane above the route, flapping between the ledges,
+## then lines up over the drifter and bombs. No gravity and no world collision:
+## it lives in the air.
 signal defeated
 
 const POOP := preload("res://scripts/level/pigeon_poop.gd")
-const TEXTURE := preload("res://Assets/Enemies/pigeon.tres")
+const FRAMES: SpriteFrames = preload("res://Assets/Enemies/pigeon_frames.tres")
+## Feet to head of the bird in the source frames.
+const BODY_PX := 146.0
+## Body centre relative to the middle of the 256 px frame.
+const BODY_OFFSET := Vector2(0.0, -35.0)
 
 @export var patrol_left: float = 0.0
 @export var patrol_right: float = 300.0
-@export var cruise_speed: float = 78.0
-@export var chase_speed: float = 125.0
-@export var sight_range: float = 430.0
+@export var cruise_speed: float = 88.0
+@export var chase_speed: float = 130.0
+@export var sight_range: float = 260.0
 @export var drop_cooldown: float = 2.4
-@export var display_height: float = 44.0
+@export var display_height: float = 40.0
 
 var target: Node2D
 var health: int = 2
 var maximum: int = 2
-var state: String = "cruise"
+var state: String = "patrol"
 var timer: float = 0.0
 var direction: float = -1.0
 
@@ -25,7 +30,7 @@ var _home_y: float
 var _clock: float = 0.0
 var _cooldown: float = 0.0
 var _flash: float = 0.0
-var _sprite: Sprite2D
+var _sprite: AnimatedSprite2D
 var _splash: Vector2 = Vector2.ZERO
 var _aiming: bool = false
 
@@ -40,10 +45,14 @@ func _ready() -> void:
 	circle.radius = 14.0
 	shape.shape = circle
 	add_child(shape)
-	_sprite = Sprite2D.new()
-	_sprite.texture = TEXTURE
-	_sprite.scale = Vector2.ONE * display_height / TEXTURE.get_height()
+	_sprite = AnimatedSprite2D.new()
+	_sprite.name = "Sprite"
+	_sprite.sprite_frames = FRAMES
+	_sprite.animation = &"flap"
+	_sprite.offset = BODY_OFFSET
+	_sprite.scale = Vector2.ONE * (display_height / BODY_PX)
 	add_child(_sprite)
+	_sprite.play(&"flap")
 	z_index = 5
 
 func _physics_process(delta: float) -> void:
@@ -55,8 +64,8 @@ func _physics_process(delta: float) -> void:
 	if is_instance_valid(target):
 		offset = target.global_position - global_position
 	match state:
-		"cruise":
-			# Only birds with a target below them bother to line up a drop.
+		"patrol":
+			# Only a bird with the drifter nearly underneath breaks off to drop.
 			if absf(offset.x) < sight_range and offset.y > 40.0 and _cooldown <= 0.0:
 				state = "aim"
 				timer = 0.5
@@ -74,20 +83,23 @@ func _physics_process(delta: float) -> void:
 				_drop()
 		"drop":
 			if timer <= 0.0:
-				state = "cruise"
+				state = "patrol"
 				_cooldown = drop_cooldown
 	var wanted := direction * cruise_speed
-	if state != "cruise":
+	if state != "patrol":
 		# Slide over the target instead of orbiting past it.
 		wanted = clampf(offset.x * 3.0, -chase_speed, chase_speed)
 	velocity.x = move_toward(velocity.x, wanted, 420.0 * delta)
 	velocity.y = 0.0
 	move_and_slide()
 	global_position.x = clampf(global_position.x, patrol_left, patrol_right)
-	position.y = _home_y + sin(_clock * 2.1) * 9.0
 	if absf(velocity.x) > 2.0:
 		direction = signf(velocity.x)
+	# The body rides the flap: it lifts while the wings push down.
+	var flap := (float(_sprite.frame) + _sprite.frame_progress) / 4.0 * TAU
+	position.y = _home_y + sin(_clock * 1.7) * 6.0 - cos(flap) * 2.5
 	_sprite.flip_h = direction < 0.0
+	_sprite.rotation = clampf(velocity.x / 420.0, -0.16, 0.16)
 	_sprite.modulate = Color(2.0, 0.75, 0.55) if _flash > 0.0 else Color.WHITE
 	queue_redraw()
 
